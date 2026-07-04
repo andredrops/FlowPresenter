@@ -1,30 +1,25 @@
-﻿const DEFAULT_IMAGE_SLIDES = [
+﻿const slides = [
   { title: "Capa", file: "Slide 01 UX Capa.png", type: "capa" },
   { title: "UX vs UI", file: "Slide 02 UX vs IU.png", type: "introdução" },
-  { title: "Slide 03", file: "UX Pecado 01.png", type: "slide" },
-  { title: "Slide 04", file: "UX Pecado 02.png", type: "slide" },
-  { title: "Slide 05", file: "UX Pecado 03.png", type: "slide" },
-  { title: "Slide 06", file: "UX Pecado 04.png", type: "slide" },
-  { title: "Slide 07", file: "UX Pecado 05.png", type: "slide" },
-  { title: "Slide 08", file: "UX Pecado 06.png", type: "slide" },
-  { title: "Slide 09", file: "UX Pecado 07.png", type: "slide" },
-  { title: "Slide 10", file: "UX Pecado 08.png", type: "slide" },
-  { title: "Slide 11", file: "UX Pecado 09.png", type: "slide" },
-  { title: "Slide 12", file: "UX Pecado 10.png", type: "slide" },
+  { title: "Pecado 01", file: "UX Pecado 01.png", type: "pecado" },
+  { title: "Pecado 02", file: "UX Pecado 02.png", type: "pecado" },
+  { title: "Pecado 03", file: "UX Pecado 03.png", type: "pecado" },
+  { title: "Pecado 04", file: "UX Pecado 04.png", type: "pecado" },
+  { title: "Pecado 05", file: "UX Pecado 05.png", type: "pecado" },
+  { title: "Pecado 06", file: "UX Pecado 06.png", type: "pecado" },
+  { title: "Pecado 07", file: "UX Pecado 07.png", type: "pecado" },
+  { title: "Pecado 08", file: "UX Pecado 08.png", type: "pecado" },
+  { title: "Pecado 09", file: "UX Pecado 09.png", type: "pecado" },
+  { title: "Pecado 10", file: "UX Pecado 10.png", type: "pecado" },
   { title: "Final", file: "UX Slide Final.png", type: "final" },
+  {
+    title: "Missão Concluída",
+    type: "encerramento",
+    text: "Missão Finalizada com Sucesso!",
+    subtitle: "UX mais claro, decisões melhores e usuários menos perdidos pelo caminho.",
+    icon: "🚀",
+  },
 ];
-
-const SUCCESS_SLIDE = {
-  title: "Missão Concluída",
-  type: "encerramento",
-  text: "Missão Finalizada com Sucesso!",
-  subtitle: "UX mais claro, decisões melhores e usuários menos perdidos pelo caminho.",
-  icon: "🚀",
-};
-
-let imageSlides = DEFAULT_IMAGE_SLIDES.map((slide) => ({ ...slide, source: "file" }));
-let slides = [...imageSlides, SUCCESS_SLIDE];
-let objectUrls = [];
 
 const state = {
   currentSlide: 0,
@@ -45,16 +40,9 @@ const state = {
 };
 
 const mapView = document.querySelector("#mapView");
-const configView = document.querySelector("#configView");
 const stageView = document.querySelector("#stageView");
 const mapPath = document.querySelector("#mapPath");
 const startButton = document.querySelector("#startButton");
-const configureButton = document.querySelector("#configureButton");
-const closeConfigButton = document.querySelector("#closeConfigButton");
-const imageUploadInput = document.querySelector("#imageUploadInput");
-const restoreDefaultsButton = document.querySelector("#restoreDefaultsButton");
-const slideManager = document.querySelector("#slideManager");
-const configStatus = document.querySelector("#configStatus");
 const stageCanvas = document.querySelector("#stageCanvas");
 const slideFrame = document.querySelector("#slideFrame");
 const slideImage = document.querySelector("#slideImage");
@@ -77,85 +65,6 @@ const buttons = {
 };
 
 const drawingContext = drawCanvas.getContext("2d");
-const DB_NAME = "FlowPresenterDB";
-const DB_VERSION = 1;
-const PRESENTATION_KEY = "default";
-
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore("presentations", { keyPath: "id" });
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function loadStoredSlides() {
-  const database = await openDatabase();
-
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction("presentations", "readonly");
-    const request = transaction.objectStore("presentations").get(PRESENTATION_KEY);
-
-    request.onsuccess = () => resolve(request.result?.slides || null);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function saveSlides() {
-  const database = await openDatabase();
-  const storedSlides = imageSlides.map(({ objectUrl, ...slide }) => slide);
-
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction("presentations", "readwrite");
-    transaction.objectStore("presentations").put({
-      id: PRESENTATION_KEY,
-      updatedAt: new Date().toISOString(),
-      slides: storedSlides,
-    });
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
-  });
-}
-
-function createObjectUrls(slidesToPrepare) {
-  objectUrls.forEach((url) => URL.revokeObjectURL(url));
-  objectUrls = [];
-
-  return slidesToPrepare.map((slide) => {
-    if (!slide.blob) return slide;
-
-    const objectUrl = URL.createObjectURL(slide.blob);
-    objectUrls.push(objectUrl);
-    return { ...slide, objectUrl };
-  });
-}
-
-function syncSlides(nextImageSlides) {
-  imageSlides = createObjectUrls(nextImageSlides);
-  slides = [...imageSlides, SUCCESS_SLIDE];
-  state.currentSlide = Math.min(state.currentSlide, Math.max(slides.length - 1, 0));
-  startButton.disabled = imageSlides.length === 0;
-  startButton.title = imageSlides.length === 0 ? "Adicione imagens em Configurar para iniciar" : "";
-  buildMap();
-  renderSlide();
-  renderSlideManager();
-}
-
-function setConfigStatus(message) {
-  configStatus.textContent = message;
-
-  if (message) {
-    window.clearTimeout(setConfigStatus.timeoutId);
-    setConfigStatus.timeoutId = window.setTimeout(() => {
-      configStatus.textContent = "";
-    }, 2200);
-  }
-}
 
 function imageCandidates(file) {
   return [`imagens/${file}`, file, `../${file}`];
@@ -165,55 +74,18 @@ function imagePath(file, candidateIndex = 0) {
   return encodeURI(imageCandidates(file)[candidateIndex]);
 }
 
-function getSlideImageSource(slide, candidateIndex = 0) {
-  if (slide.objectUrl) return slide.objectUrl;
-  if (slide.file) return imagePath(slide.file, candidateIndex);
-  return "";
-}
-
 function buildMap() {
   const tilts = [-3, 2, -1, 3, 1, -2, 2, -3, 3, -1, 2, -2, 1];
   const lifts = [0, 18, -8, 12, -14, 8, 20, -6, 10, -16, 4, 18, -10];
-  const positions = [
-    { left: 16, top: 12, width: "clamp(210px, 28vw, 390px)", z: 4 },
-    { left: 62, top: 11, width: "clamp(200px, 27vw, 372px)", z: 3 },
-    { left: 16, top: 32, z: 8 },
-    { left: 40, top: 35, z: 7 },
-    { left: 63, top: 33, z: 6 },
-    { left: 84, top: 36, z: 9 },
-    { left: 15, top: 55, z: 5 },
-    { left: 39, top: 54, z: 6 },
-    { left: 63, top: 57, z: 5 },
-    { left: 86, top: 55, z: 7 },
-    { left: 15, top: 76, z: 4 },
-    { left: 40, top: 76, z: 5 },
-    { left: 61, top: 82, width: "clamp(240px, 30vw, 410px)", z: 10 },
-  ];
-  const mapSlides = imageSlides;
-
-  if (mapSlides.length === 0) {
-    mapPath.innerHTML = `
-      <div class="empty-map">
-        <strong>Nenhuma imagem configurada.</strong>
-        <span>Clique em Configurar para carregar imagens e iniciar sua apresentação.</span>
-      </div>
-    `;
-    return;
-  }
+  const mapSlides = slides.filter((slide) => slide.file);
 
   mapPath.innerHTML = mapSlides
-    .map((slide, index) => {
-      const position = positions[index % positions.length];
-      const cycle = Math.floor(index / positions.length);
-      const offset = cycle * 2.6;
-
-      return `
-      <button class="map-card" type="button" data-index="${index}" style="--tilt: ${tilts[index % tilts.length]}deg; --lift: ${lifts[index % lifts.length]}px; left: ${Math.min(90, position.left + offset)}%; top: ${Math.min(88, position.top + offset)}%; width: ${position.width || "clamp(132px, 15vw, 224px)"}; z-index: ${position.z + cycle};" aria-label="Abrir ${slide.title}">
-        <img src="${getSlideImageSource(slide)}" data-candidate="0" alt="Miniatura: ${slide.title}" />
-        <span>${String(index + 1).padStart(2, "0")}</span>
+    .map((slide, index) => `
+      <button class="map-card" type="button" data-index="${index}" style="--tilt: ${tilts[index]}deg; --lift: ${lifts[index]}px" aria-label="Abrir ${slide.title}">
+        <img src="${imagePath(slide.file)}" data-candidate="0" alt="Miniatura: ${slide.title}" />
+        <span>${String(index + 1).padStart(2, "0")} • ${slide.title}</span>
       </button>
-    `;
-    })
+    `)
     .join("");
 
   mapPath.querySelectorAll(".map-card").forEach((card) => {
@@ -222,17 +94,11 @@ function buildMap() {
 
   mapPath.querySelectorAll("img").forEach((image) => {
     image.addEventListener("error", () => {
-      const slide = imageSlides[Number(image.closest(".map-card").dataset.index)];
-      if (!slide?.file) {
-        image.style.display = "none";
-        image.parentElement.classList.add("image-missing");
-        return;
-      }
-
+      const slide = slides[Number(image.closest(".map-card").dataset.index)];
       const nextCandidate = Number(image.dataset.candidate) + 1;
       if (nextCandidate < imageCandidates(slide.file).length) {
         image.dataset.candidate = String(nextCandidate);
-        image.src = getSlideImageSource(slide, nextCandidate);
+        image.src = imagePath(slide.file, nextCandidate);
         return;
       }
 
@@ -243,12 +109,9 @@ function buildMap() {
 }
 
 function openSlide(index = 0) {
-  if (imageSlides.length === 0) return;
-
   state.currentSlide = Math.max(0, Math.min(index, slides.length - 1));
   renderSlide();
   setPointerMode(true);
-  configView.classList.remove("is-active");
   mapView.classList.add("is-zooming-out");
   stageView.classList.add("is-zooming-in");
 
@@ -265,7 +128,6 @@ function showMap() {
   resetZoom();
   disableTools();
   clearDrawing();
-  configView.classList.remove("is-active");
   stageView.classList.add("is-zooming-in");
   mapView.classList.add("is-active");
   mapView.classList.remove("is-zooming-out");
@@ -279,18 +141,17 @@ function showMap() {
 
 function renderSlide() {
   const slide = slides[state.currentSlide];
-  const hasImage = Boolean(slide.file || slide.objectUrl);
   resetZoom();
   clearDrawing();
   slideFrame.querySelector(".missing-image")?.remove();
   slideFrame.querySelector(".success-slide")?.remove();
-  slideFrame.classList.toggle("is-text-slide", !hasImage);
-  slideImage.hidden = !hasImage;
+  slideFrame.classList.toggle("is-text-slide", !slide.file);
+  slideImage.hidden = !slide.file;
 
-  if (hasImage) {
+  if (slide.file) {
     slideImage.alt = `${slide.title} — ${slide.type}`;
     slideImage.dataset.candidate = "0";
-    slideImage.src = getSlideImageSource(slide);
+    slideImage.src = imagePath(slide.file);
   } else {
     slideImage.removeAttribute("src");
     slideImage.alt = "";
@@ -309,7 +170,7 @@ function renderSlide() {
   slideTitle.textContent = slide.title;
   buttons.previous.disabled = state.currentSlide === 0;
   buttons.next.disabled = state.currentSlide === slides.length - 1;
-  buttons.zoom.disabled = !hasImage;
+  buttons.zoom.disabled = !slide.file;
 }
 
 function nextSlide() {
@@ -508,8 +369,7 @@ function applyPointZoom(point, scale = 2) {
 }
 
 function canInteractWithImage(event) {
-  const slide = slides[state.currentSlide];
-  return event.button === 0 && Boolean(slide.file || slide.objectUrl) && !state.penMode;
+  return event.button === 0 && slides[state.currentSlide].file && !state.penMode;
 }
 
 function startImageInteraction(event) {
@@ -631,8 +491,7 @@ function startDrawing(event) {
   const isRightButton = event.button === 2;
   const isLeftPenButton = state.penMode && event.button === 0;
 
-  const slide = slides[state.currentSlide];
-  if ((!isRightButton && !isLeftPenButton) || !Boolean(slide.file || slide.objectUrl)) return;
+  if ((!isRightButton && !isLeftPenButton) || !slides[state.currentSlide].file) return;
 
   if (isRightButton) {
     event.preventDefault();
@@ -661,120 +520,6 @@ function updateLaserPointer(event) {
   laserPointer.style.top = `${event.clientY}px`;
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function showConfig() {
-  resetZoom();
-  disableTools();
-  clearDrawing();
-  mapView.classList.remove("is-active");
-  stageView.classList.remove("is-active");
-  configView.classList.add("is-active");
-  configView.setAttribute("aria-hidden", "false");
-  mapView.setAttribute("aria-hidden", "true");
-  stageView.setAttribute("aria-hidden", "true");
-  renderSlideManager();
-}
-
-function hideConfig() {
-  configView.classList.remove("is-active");
-  configView.setAttribute("aria-hidden", "true");
-  mapView.classList.add("is-active");
-  mapView.setAttribute("aria-hidden", "false");
-  buildMap();
-}
-
-function renderSlideManager() {
-  if (!slideManager) return;
-
-  if (imageSlides.length === 0) {
-    slideManager.innerHTML = `
-      <div class="empty-config">
-        <strong>Nenhuma imagem selecionada.</strong>
-        <span>Carregue imagens para habilitar a apresentação.</span>
-      </div>
-    `;
-    return;
-  }
-
-  slideManager.innerHTML = imageSlides
-    .map((slide, index) => `
-      <article class="manager-card" draggable="true" data-index="${index}">
-        <img src="${getSlideImageSource(slide)}" alt="Miniatura ${index + 1}" />
-        <div class="manager-info">
-          <strong>${String(index + 1).padStart(2, "0")}</strong>
-          <input type="text" value="${escapeHtml(slide.title || `Slide ${index + 1}`)}" aria-label="Título do slide ${index + 1}" data-title-index="${index}" />
-          <span>${slide.source === "upload" ? "Imagem carregada" : "Imagem padrão"}</span>
-        </div>
-        <div class="manager-actions">
-          <button type="button" data-move-up="${index}" ${index === 0 ? "disabled" : ""}>↑</button>
-          <button type="button" data-move-down="${index}" ${index === imageSlides.length - 1 ? "disabled" : ""}>↓</button>
-          <button type="button" data-remove="${index}">Remover</button>
-        </div>
-      </article>
-    `)
-    .join("");
-}
-
-async function persistAndRefresh(message) {
-  await saveSlides();
-  syncSlides(imageSlides);
-  setConfigStatus(message);
-}
-
-async function addUploadedImages(files) {
-  const newSlides = Array.from(files)
-    .filter((file) => file.type.startsWith("image/"))
-    .map((file, offset) => ({
-      id: crypto.randomUUID(),
-      title: file.name.replace(/\.[^.]+$/, "") || `Slide ${imageSlides.length + offset + 1}`,
-      type: "slide",
-      source: "upload",
-      blob: file,
-    }));
-
-  if (newSlides.length === 0) return;
-
-  imageSlides = [...imageSlides, ...newSlides];
-  await persistAndRefresh(`${newSlides.length} imagem(ns) adicionada(s).`);
-}
-
-async function removeSlide(index) {
-  imageSlides = imageSlides.filter((_, slideIndex) => slideIndex !== index);
-  await persistAndRefresh("Slide removido da apresentação.");
-}
-
-async function moveSlide(fromIndex, toIndex) {
-  if (toIndex < 0 || toIndex >= imageSlides.length || fromIndex === toIndex) return;
-
-  const reorderedSlides = [...imageSlides];
-  const [movedSlide] = reorderedSlides.splice(fromIndex, 1);
-  reorderedSlides.splice(toIndex, 0, movedSlide);
-  imageSlides = reorderedSlides;
-  await persistAndRefresh("Ordem atualizada.");
-}
-
-async function updateSlideTitle(index, title) {
-  imageSlides[index] = {
-    ...imageSlides[index],
-    title: title.trim() || `Slide ${index + 1}`,
-  };
-  await saveSlides();
-  syncSlides(imageSlides);
-}
-
-async function restoreDefaultSlides() {
-  imageSlides = DEFAULT_IMAGE_SLIDES.map((slide) => ({ ...slide, source: "file" }));
-  await persistAndRefresh("Apresentação padrão restaurada.");
-}
-
 function handleKeyboard(event) {
   const tag = document.activeElement?.tagName?.toLowerCase();
   if (["input", "textarea", "select"].includes(tag)) return;
@@ -795,56 +540,6 @@ function handleKeyboard(event) {
 
 function attachEvents() {
   startButton.addEventListener("click", () => openSlide(0));
-  configureButton.addEventListener("click", showConfig);
-  closeConfigButton.addEventListener("click", hideConfig);
-  restoreDefaultsButton.addEventListener("click", restoreDefaultSlides);
-  imageUploadInput.addEventListener("change", async (event) => {
-    await addUploadedImages(event.target.files);
-    imageUploadInput.value = "";
-  });
-
-  slideManager.addEventListener("click", async (event) => {
-    const button = event.target.closest("button");
-    if (!button) return;
-
-    if (button.hasAttribute("data-remove")) {
-      await removeSlide(Number(button.dataset.remove));
-    }
-
-    if (button.hasAttribute("data-move-up")) {
-      const index = Number(button.dataset.moveUp);
-      await moveSlide(index, index - 1);
-    }
-
-    if (button.hasAttribute("data-move-down")) {
-      const index = Number(button.dataset.moveDown);
-      await moveSlide(index, index + 1);
-    }
-  });
-
-  slideManager.addEventListener("change", async (event) => {
-    if (!event.target.matches("[data-title-index]")) return;
-    await updateSlideTitle(Number(event.target.dataset.titleIndex), event.target.value);
-  });
-
-  slideManager.addEventListener("dragstart", (event) => {
-    const card = event.target.closest(".manager-card");
-    if (!card) return;
-    event.dataTransfer.setData("text/plain", card.dataset.index);
-  });
-
-  slideManager.addEventListener("dragover", (event) => {
-    if (event.target.closest(".manager-card")) event.preventDefault();
-  });
-
-  slideManager.addEventListener("drop", async (event) => {
-    const card = event.target.closest(".manager-card");
-    if (!card) return;
-
-    event.preventDefault();
-    await moveSlide(Number(event.dataTransfer.getData("text/plain")), Number(card.dataset.index));
-  });
-
   buttons.previous.addEventListener("click", previousSlide);
   buttons.next.addEventListener("click", nextSlide);
   buttons.map.addEventListener("click", showMap);
@@ -888,7 +583,7 @@ function attachEvents() {
     const nextCandidate = Number(slideImage.dataset.candidate) + 1;
     if (nextCandidate < imageCandidates(slide.file).length) {
       slideImage.dataset.candidate = String(nextCandidate);
-      slideImage.src = getSlideImageSource(slide, nextCandidate);
+      slideImage.src = imagePath(slide.file, nextCandidate);
       return;
     }
 
@@ -900,20 +595,8 @@ function attachEvents() {
   });
 }
 
-async function initializeApp() {
-  try {
-    const storedSlides = await loadStoredSlides();
-    syncSlides(storedSlides?.length ? storedSlides : imageSlides);
-  } catch (error) {
-    console.error("Não foi possível carregar a configuração local.", error);
-    syncSlides(imageSlides);
-    setConfigStatus("Não foi possível carregar dados locais.");
-  }
-
-  attachEvents();
-}
-
-initializeApp();
-
+buildMap();
+renderSlide();
+attachEvents();
 
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>F l o w Presenter</title>
+  <title>UX na prática: Os 10 Pecados Capitais do UX</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -15,40 +15,13 @@
       <div class="ambient ambient-two"></div>
 
       <header class="hero">
-        <p class="eyebrow"> Apresentador de Imagens </p>
-        <h1>Flow Presenter<br />  </h1>
+        <p class="eyebrow">Aula de UX • apresentação interativa</p>
+        <h1>UX na prática:<br />Os 10 Pecados Capitais do UX</h1>
         <p class="hero-copy">Navegue pelo caminho, aproxime detalhes, destaque pontos importantes e rabisque ideias durante a explicação.</p>
-        <div class="hero-actions">
-          <button id="startButton" class="primary-button" type="button">Iniciar apresentação</button>
-          <button id="configureButton" class="secondary-button" type="button">Configurar</button>
-        </div>
+        <button id="startButton" class="primary-button" type="button">Iniciar apresentação</button>
       </header>
 
       <div id="mapPath" class="map-path" aria-label="Sequência de slides"></div>
-    </section>
-
-    <section id="configView" class="config-view" aria-label="Configurar apresentação" aria-hidden="true">
-      <div class="config-panel">
-        <header class="config-header">
-          <div>
-            <p class="eyebrow">Configuração local</p>
-            <h2>Administrar imagens</h2>
-            <p>Carregue imagens, ajuste a ordem e remova slides apenas desta apresentação. Tudo fica salvo neste navegador.</p>
-          </div>
-          <button id="closeConfigButton" class="secondary-button" type="button">Voltar</button>
-        </header>
-
-        <div class="config-toolbar">
-          <label class="upload-button">
-            Carregar imagens
-            <input id="imageUploadInput" type="file" accept="image/*" multiple />
-          </label>
-          <button id="restoreDefaultsButton" class="secondary-button" type="button">Restaurar padrão</button>
-          <span id="configStatus" class="config-status" aria-live="polite"></span>
-        </div>
-
-        <div id="slideManager" class="slide-manager" aria-label="Slides configurados"></div>
-      </div>
     </section>
 
     <section id="stageView" class="stage-view" aria-label="Slide atual" aria-hidden="true">
