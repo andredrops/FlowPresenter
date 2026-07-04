@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UX na prática: Os 10 Pecados Capitais do UX</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="prezi-shell" aria-label="Apresentação UX na prática">
+    <button id="fullscreenButton" class="fullscreen-button" type="button" title="Maximizar/minimizar tela" aria-label="Maximizar apresentação">⛶</button>
+
+    <section id="mapView" class="map-view is-active" aria-label="Mapa geral da apresentação">
+      <div class="ambient ambient-one"></div>
+      <div class="ambient ambient-two"></div>
+
+      <header class="hero">
+        <p class="eyebrow">Aula de UX • apresentação interativa</p>
+        <h1>UX na prática:<br />Os 10 Pecados Capitais do UX</h1>
+        <p class="hero-copy">Navegue pelo caminho, aproxime detalhes, destaque pontos importantes e rabisque ideias durante a explicação.</p>
+        <button id="startButton" class="primary-button" type="button">Iniciar apresentação</button>
+      </header>
+
+      <div id="mapPath" class="map-path" aria-label="Sequência de slides"></div>
+    </section>
+
+    <section id="stageView" class="stage-view" aria-label="Slide atual" aria-hidden="true">
+      <div id="stageCanvas" class="stage-canvas">
+        <div id="slideFrame" class="slide-frame">
+          <img id="slideImage" alt="" draggable="false" />
+          <canvas id="drawCanvas" class="draw-canvas"></canvas>
+          <div id="selectionBox" class="selection-box" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <button id="prevButton" class="side-nav side-nav-prev" type="button" aria-label="Slide anterior">‹</button>
+      <button id="nextButton" class="side-nav side-nav-next" type="button" aria-label="Próximo slide">›</button>
+
+      <nav class="controls" aria-label="Controles da apresentação">
+        <div class="control-left">
+          <button id="mapButton" type="button" aria-label="Voltar ao início">Início</button>
+        </div>
+        <div class="control-buttons">
+          <button id="zoomButton" type="button" title="Clique esquerdo na imagem liga/desliga o zoom. Clique e segure para mover quando ampliado." aria-label="Zoom: clique esquerdo na imagem liga ou desliga">Zoom</button>
+          <button id="resetZoomButton" class="is-hidden" type="button" title="Desliga o zoom e limpa rabiscos">Voltar ao normal</button>
+          <button id="pointerButton" type="button" title="Ativa/desativa o ponteiro luminoso. Atalho: P">Ponteiro</button>
+          <button id="penButton" type="button" title="Ativa/desativa o lápis com clique esquerdo. Dica: clique direito desenha direto sobre a imagem.">Lápis</button>
+          <button id="clearButton" class="is-hidden" type="button" title="Limpa os rabiscos e desativa o lápis. Atalho: C">Limpar Lápis</button>
+        </div>
+        <div class="slide-meta" aria-live="polite">
+          <span id="slideCounter">1 / 13</span>
+          <strong id="slideTitle">Slide</strong>
+        </div>
+      </nav>
+
+      <div id="laserPointer" class="laser-pointer" aria-hidden="true"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
